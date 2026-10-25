@@ -3,50 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NFT Кейсы</title>
-    <link rel="stylesheet" href="style.css">
+    <title>NFT Universe</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --panel: #151520;
+            --border: #2a2a3e;
+            --accent: #8b5cf6;
+            --accent-hover: #a855f7;
+            --text: #ffffff;
+            --text-muted: #9ca3af;
+            --gold: #fbbf24;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 70px; }
+        .hidden { display: none !important; }
+
+        /* Шапка */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .user-level { display: flex; align-items: center; gap: 10px; }
+        .lvl-badge { background: var(--accent); padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+        .xp-bar { width: 100px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .xp-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .balance-box { background: #252536; padding: 8px 16px; border-radius: 20px; font-weight: bold; color: var(--gold); border: 1px solid #3e3e5e; }
+
+        /* Экраны */
+        .screen { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; text-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
+
+        /* Сетка кейсов */
+        .cases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 20px; }
+        .case-card { background: var(--panel); border-radius: 16px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
+        .case-card:active { transform: scale(0.96); }
+        .case-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--case-color, var(--accent)); }
+        
+        .case-img { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; background: #000; border: 2px solid var(--case-color, var(--accent)); box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 15px var(--case-color, transparent); }
+        .case-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; text-align: center; }
+        .case-price { background: #252536; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; color: var(--gold); }
+
+        /* Нижнее меню */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.2s; }
+        .nav-btn.active { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        .nav-icon { font-size: 20px; }
+
+        /* Рулетка */
+        .roulette-wrapper { background: #000; border-radius: 16px; height: 120px; position: relative; overflow: hidden; margin: 20px 0; border: 2px solid var(--accent); box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
+        .roulette-marker { position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #ef4444; z-index: 10; transform: translateX(-50%); box-shadow: 0 0 10px #ef4444; }
+        .roulette-track { display: flex; align-items: center; height: 100%; position: absolute; }
+        .roulette-item { min-width: 100px; height: 100px; margin: 0 5px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; font-size: 11px; background: var(--panel); border: 1px solid var(--border); }
+        
+        /* Кнопки */
+        .btn { background: linear-gradient(135deg, var(--accent), #6d28d9); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transition: 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        
+        /* Инвентарь */
+        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .inv-card { background: var(--panel); border-radius: 16px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; }
+        .inv-img { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; margin-bottom: 8px; border: 2px solid #fff; }
+        .inv-sell-btn { background: #ef4444; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; margin-top: 8px; }
+
+        /* Задания */
+        .task-card { background: var(--panel); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .task-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .task-info p { font-size: 12px; color: var(--text-muted); }
+        .task-reward { color: var(--gold); font-weight: bold; font-size: 14px; }
+        
+        /* Профиль */
+        .profile-box { background: var(--panel); border-radius: 16px; padding: 20px; border: 1px solid var(--border); text-align: center; margin-bottom: 20px; }
+        .promo-input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; margin-top: 10px; text-align: center; font-size: 16px; }
+    </style>
 </head>
 <body>
-    <!-- Верхняя панель -->
-    <header class="top-bar">
-        <div class="user-info">
-            <span class="avatar">👤</span>
-            <span class="username">Игрок</span>
-        </div>
-        <div class="balance-box">
-            <span id="balance">1000</span> ⭐
-        </div>
-    </header>
-
-    <!-- Главный экран (Кейсы) -->
-    <div class="screen active" id="main-screen">
-        <h2 class="section-title">Выбери кейс</h2>
-        <div class="cases-grid" id="cases-grid">
-            <!-- Кейсы будут вставлены через JS -->
-        </div>
-        <button class="btn-collection" onclick="showCollection()">🎒 Моя коллекция</button>
-    </div>
-
-    <!-- Экран рулетки -->
-    <div class="screen hidden" id="roulette-screen">
-        <h2 id="current-case-name">Открываем...</h2>
-        <div class="roulette-wrapper">
-            <div class="roulette-marker"></div>
-            <div class="roulette-track" id="roulette-track">
-                <!-- Элементы рулетки -->
+    <!-- Шапка -->
+    <header class="header">
+        <div class="user-level">
+            <div class="lvl-badge" id="user-level">Ур. 1</div>
+            <div style="display:flex; flex-direction:column; font-size:12px;">
+                <span>Опыт</span>
+                <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
             </div>
         </div>
-        <button class="btn-main hidden" id="claim-btn" onclick="finishOpening()">Забрать</button>
+        <div class="balance-box"><span id="balance">1000</span> ⭐</div>
+    </header>
+
+    <!-- Экран 1: Кейсы -->
+    <div class="screen active" id="screen-cases">
+        <h2 class="section-title">Кейсы</h2>
+        <div class="cases-grid" id="cases-grid"></div>
     </div>
 
-    <!-- Экран коллекции -->
-    <div class="screen hidden" id="collection-screen">
-        <h2 class="section-title">Мои NFT</h2>
+    <!-- Экран 2: Рулетка -->
+    <div class="screen" id="screen-roulette">
+        <h2 class="section-title" id="current-case-name">Открываем...</h2>
+        <div class="roulette-wrapper">
+            <div class="roulette-marker"></div>
+            <div class="roulette-track" id="roulette-track"></div>
+        </div>
+        <button class="btn hidden" id="claim-btn" onclick="finishOpening()">Забрать</button>
+    </div>
+
+    <!-- Экран 3: Инвентарь -->
+    <div class="screen" id="screen-inv">
+        <h2 class="section-title">Инвентарь</h2>
         <div class="inventory-grid" id="inventory-grid"></div>
-        <button class="btn-main" onclick="showMain()">Назад к кейсам</button>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Экран 4: Задания -->
+    <div class="screen" id="screen-tasks">
+        <h2 class="section-title">Задания</h2>
+        <h3 style="font-size:16px; margin:15px 0 10px; color:#a855f7;">Ежедневные</h3>
+        <div id="daily-tasks"></div>
+        <h3 style="font-size:16px; margin:15px 0 10px; color:#3b82f6;">Еженедельные</h3>
+        <div id="weekly-tasks"></div>
+        <h3 style="font-size:16px; margin:15px 0 10px; color:#fbbf24;">Достижения</h3>
+        <div id="achievement-tasks"></div>
+    </div>
+
+    <!-- Экран 5: Профиль -->
+    <div class="screen" id="screen-profile">
+        <h2 class="section-title">Профиль</h2>
+        <div class="profile-box">
+            <h3>Ввести промокод</h3>
+            <input type="text" class="promo-input" id="promo-input" placeholder="Введите код...">
+            <button class="btn" onclick="redeemPromo()">Активировать</button>
+        </div>
+        <div class="profile-box">
+            <h3>Трейды</h3>
+            <p style="font-size:12px; color:#9ca3af; margin: 10px 0;">Обмен NFT с другими игроками</p>
+            <button class="btn" style="background:#2a2a3e; box-shadow:none;" onclick="alert('Трейды появятся, когда мы подключим сервер!')">Открыть Трейды</button>
+        </div>
+        <div class="profile-box">
+            <h3>Статистика</h3>
+            <p style="margin-top:10px; font-size:14px;">Открыто кейсов: <span id="stat-opened">0</span></p>
+        </div>
+    </div>
+
+    <!-- Нижнее меню -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('cases')">
+            <span class="nav-icon">📦</span>Кейсы
+        </button>
+        <button class="nav-btn" onclick="switchTab('inv')">
+            <span class="nav-icon">🎒</span>Инвентарь
+        </button>
+        <button class="nav-btn" onclick="switchTab('tasks')">
+            <span class="nav-icon">📋</span>Задания
+        </button>
+        <button class="nav-btn" onclick="switchTab('profile')">
+            <span class="nav-icon">👤</span>Профиль
+        </button>
+    </nav>
+
+    <script>
+        // --- ДАННЫЕ ИГРОКА ---
+        let player = {
+            balance: 1000,
+            xp: 0,
+            level: 1,
+            inventory: [],
+            casesOpened: 0,
+            promoUsed: false
+        };
+
+        // --- БАЗА NFT ---
+        const nftThemes = {
+            black: { name: 'Черный', color: '#333', textColor: '#ccc', emoji: '🌑' },
+            white: { name: 'Белый', color: '#eee', textColor: '#000', emoji: '🌟' },
+            red: { name: 'Красный', color: '#ef4444', textColor: '#fff', emoji: '🔥' },
+            blue: { name: 'Синий', color: '#3b82f6', textColor: '#fff', emoji: '💧' },
+            green: { name: 'Зеленый', color: '#10b981', textColor: '#fff', emoji: '🌿' },
+            gold: { name: 'Золотой', color: '#fbbf24', textColor: '#000', emoji: '👑' }
+        };
+        const rarities = ['Обычный', 'Необычный', 'Редкий', 'Эпический', 'Легендарный'];
+        
+        // --- ГЕНЕРАТОР 30 КЕЙСОВ ---
+        const cases = [];
+        let caseIdCounter = 1;
+        Object.keys(nftThemes).forEach(themeKey => {
+            const theme = nftThemes[themeKey];
+            for(let i=0; i<5; i++) { // 5 уровней редкости в каждой теме
+                const rarityLevel = rarities[i];
+                const price = Math.floor(25 * Math.pow(2.5, i)) + (themeKey === 'gold' ? 500 : 0);
+                cases.push({
+                    id: caseIdCounter++,
+                    name: `${theme.name} ${rarityLevel}`,
+                    theme: themeKey,
+                    color: theme.color,
+                    price: price,
+                    rarity: rarityLevel,
+                    emoji: theme.emoji
+                });
+            }
+        });
+
+        // --- ЗАДАНИЯ ---
+        const tasks = {
+            daily: [
+                { id: 'd1', text: 'Открой 5 кейсов', target: 5, reward: 100, type: 'open' },
+                { id: 'd2', text: 'Продай 3 NFT', target: 3, reward: 50, type: 'sell' },
+                { id: 'd3', text: 'Открой 1 Редкий кейс', target: 1, reward: 150, type: 'rare' }
+            ],
+            weekly: [
+                { id: 'w1', text: 'Открой 50 кейсов', target: 50, reward: 1000, type: 'open' },
+                { id: 'w2', text: 'Открой 5 Эпических кейсов', target: 5, reward: 2000, type: 'epic' }
+            ],
+            achievements: [
+                { id: 'a1', text: 'Первый шаг (Открой 1 кейс)', target: 1, reward: 50, type: 'open' },
+                { id: 'a2', text: 'Новичок (Открой 10 кейсов)', target: 10, reward: 200, type: 'open' },
+                { id: 'a3', text: 'Коллекционер (Собери 20 NFT)', target: 20, reward: 500, type: 'inv' }
+            ]
+        };
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        function updateUI() {
+            document.getElementById('balance').innerText = player.balance;
+            document.getElementById('user-level').innerText = `Ур. ${player.level}`;
+            const xpNeeded = player.level * 100;
+            document.getElementById('xp-fill').style.width = `${Math.min(100, (player.xp / xpNeeded) * 100)}%`;
+            document.getElementById('stat-opened').innerText = player.casesOpened;
+            
+            // Блокируем кнопки промокода, если уже использован
+            if (player.promoUsed) {
+                document.getElementById('promo-input').disabled = true;
+                document.getElementById('promo-input').placeholder = "Код уже активирован";
+            }
+        }
+
+        function addXP(amount) {
+            player.xp += amount;
+            const xpNeeded = player.level * 100;
+            if (player.xp >= xpNeeded) {
+                player.xp -= xpNeeded;
+                player.level++;
+                player.balance += player.level * 50; // Награда за уровень
+                alert(`🎉 Новый уровень! Вы достигли Ур. ${player.level} и получили ${player.level * 50} ⭐`);
+            }
+            updateUI();
+        }
+
+        // --- НАВИГАЦИЯ ---
+        function switchTab(tab) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`screen-${tab}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tab === 'inv') renderInventory();
+            if (tab === 'tasks') renderTasks();
+        }
+
+        // --- КЕЙСЫ ---
+        function renderCases() {
+            const grid = document.getElementById('cases-grid');
+            grid.innerHTML = cases.map(c => `
+                <div class="case-card" style="--case-color: ${c.color};" onclick="startOpening(${c.id})">
+                    <div class="case-img" style="color: ${c.color};">${c.emoji}</div>
+                    <div class="case-name">${c.name}</div>
+                    <div class="case-price">${c.price} ⭐</div>
+                </div>
+            `).join('');
+        }
+
+        let currentWin = null;
+        let currentCasePrice = 0;
+
+        function startOpening(id) {
+            const c = cases.find(x => x.id === id);
+            if (player.balance < c.price) return alert('Недостаточно звезд!');
+            
+            player.balance -= c.price;
+            currentCasePrice = c.price;
+            updateUI();
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-roulette').classList.add('active');
+            document.getElementById('current-case-name').innerText = `Открываем: ${c.name}`;
+            document.getElementById('claim-btn').classList.add('hidden');
+
+            const track = document.getElementById('roulette-track');
+            track.innerHTML = '';
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+
+            // Генерируем рулетку (40 элементов)
+            for (let i = 0; i < 40; i++) {
+                const theme = nftThemes[c.theme];
+                const el = document.createElement('div');
+                el.className = 'roulette-item';
+                el.style.border = `2px solid ${theme.color}`;
+                el.style.boxShadow = `inset 0 0 10px ${theme.color}`;
+                el.innerHTML = `<div style="font-size: 30px;">${theme.emoji}</div><div>${c.rarity}</div>`;
+                track.appendChild(el);
+            }
+
+            // Выигрышный элемент
+            const theme = nftThemes[c.theme];
+            currentWin = { name: c.name, rarity: c.rarity, value: c.price, theme: c.theme, emoji: c.emoji };
+            const winIndex = 35;
+            track.children[winIndex].style.border = `2px solid #fff`;
+            track.children[winIndex].style.boxShadow = `0 0 20px #fff`;
+
+            setTimeout(() => {
+                const itemWidth = 110;
+                const centerOffset = (track.parentElement.offsetWidth / 2) - (itemWidth / 2);
+                const stopPos = -((winIndex * itemWidth) - centerOffset);
+                track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.15, 1)';
+                track.style.transform = `translateX(${stopPos}px)`;
+            }, 50);
+
+            setTimeout(() => {
+                document.getElementById('claim-btn').classList.remove('hidden');
+            }, 4200);
+        }
+
+        function finishOpening() {
+            player.inventory.push(currentWin);
+            player.casesOpened++;
+            addXP(Math.floor(currentCasePrice / 2)); // Опыт за кейс
+            
+            // Обновление заданий
+            checkTaskProgress('open', 1);
+            if(currentWin.rarity === 'Редкий') checkTaskProgress('rare', 1);
+            if(currentWin.rarity === 'Эпический') checkTaskProgress('epic', 1);
+            
+            alert(`Вы выиграли: ${currentWin.emoji} ${currentWin.name}!`);
+            switchTabToCases();
+        }
+
+        function switchTabToCases() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-cases').classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+        }
+
+        // --- ИНВЕНТАРЬ ---
+        function renderInventory() {
+            const grid = document.getElementById('inventory-grid');
+            if (player.inventory.length === 0) {
+                grid.innerHTML = '<p style="grid-column: span 2; color: #666; text-align:center;">Пусто. Открывай кейсы!</p>';
+                return;
+            }
+            grid.innerHTML = player.inventory.map((item, i) => {
+                const t = nftThemes[item.theme];
+                return `
+                <div class="inv-card">
+                    <div class="inv-img" style="background: ${t.color}33; border-color: ${t.color}; box-shadow: 0 0 10px ${t.color}; color: ${t.textColor};">${t.emoji}</div>
+                    <div style="font-size:13px; font-weight:bold; text-align:center;">${item.name}</div>
+                    <div style="font-size:10px; color:#888; margin:4px 0;">${item.rarity}</div>
+                    <button class="inv-sell-btn" onclick="sellItem(${i})">Продать ${Math.floor(item.value * 0.5)} ⭐</button>
+                </div>`;
+            }).join('');
+        }
+
+        function sellItem(index) {
+            const item = player.inventory[index];
+            if(confirm(`Продать ${item.name} за ${Math.floor(item.value * 0.5)} ⭐?`)) {
+                player.balance += Math.floor(item.value * 0.5);
+                player.inventory.splice(index, 1);
+                checkTaskProgress('sell', 1);
+                updateUI();
+                renderInventory();
+            }
+        }
+
+        // --- ЗАДАНИЯ ---
+        function renderTasks() {
+            const renderList = (list, containerId) => {
+                document.getElementById(containerId).innerHTML = list.map(t => `
+                    <div class="task-card">
+                        <div class="task-info">
+                            <h4>${t.text}</h4>
+                        </div>
+                        <div class="task-reward">+${t.reward} ⭐</div>
+                    </div>
+                `).join('');
+            };
+            renderList(tasks.daily, 'daily-tasks');
+            renderList(tasks.weekly, 'weekly-tasks');
+            renderList(tasks.achievements, 'achievement-tasks');
+        }
+
+        function checkTaskProgress(type, amount) {
+            // Упрощенная система: просто показываем уведомление, если прогресс достигнут
+            let completed = false;
+            Object.values(tasks).flat().forEach(t => {
+                if(t.type === type) {
+                    t.current = (t.current || 0) + amount;
+                    if(t.current >= t.target && !t.claimed) {
+                        t.claimed = true;
+                        player.balance += t.reward;
+                        completed = true;
+                    }
+                }
+            });
+            if(completed) {
+                updateUI();
+                alert('🎁 Вы выполнили задание и получили награду!');
+            }
+        }
+
+        // --- ПРОМОКОД ---
+        function redeemPromo() {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            if(code === 'SHARF' && !player.promoUsed) {
+                player.promoUsed = true;
+                player.balance += 2000;
+                addXP(100);
+                
+                // Даем 2 эпик кейса в инвентарь
+                const epicCase = cases.find(c => c.name.includes('Фиолетовый Эпический') || c.rarity === 'Эпический');
+                if(epicCase) {
+                    player.inventory.push({ name: 'Подарок: ' + epicCase.name, rarity: 'Кейс', value: epicCase.price, theme: 'black', emoji: '🎁' });
+                    player.inventory.push({ name: 'Подарок: ' + epicCase.name, rarity: 'Кейс', value: epicCase.price, theme: 'black', emoji: '🎁' });
+                }
+                
+                alert('✅ Промокод активирован! Вы получили 2000⭐, 100 XP и 2 Эпик кейса в инвентарь (продайте их, чтобы получить звезды).');
+                updateUI();
+                document.getElementById('promo-input').value = '';
+            } else if (player.promoUsed) {
+                alert('Вы уже использовали этот промокод!');
+            } else {
+                alert('❌ Неверный промокод!');
+            }
+        }
+
+        // Запуск
+        renderCases();
+        updateUI();
+    </script>
 </body>
 </html>
