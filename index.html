@@ -3,385 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NFT Universe</title>
+    <title>NFT Кейсы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg: #0a0a0f;
-            --panel: #151520;
-            --border: #2a2a3e;
-            --accent: #8b5cf6;
-            --text: #ffffff;
-            --gold: #fbbf24;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #09090b; color: #fff; padding-bottom: 70px; }
+        
+        .header { display: flex; justify-content: space-between; padding: 15px; background: #18181b; border-bottom: 1px solid #27272a; position: sticky; top: 0; z-index: 10; }
+        .lvl { background: #8b5cf6; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .money { background: #27272a; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: #fbbf24; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 70px; }
-        .hidden { display: none !important; }
-
-        /* Шапка */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .user-level { display: flex; align-items: center; gap: 10px; }
-        .lvl-badge { background: var(--accent); padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; }
-        .xp-bar { width: 80px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-        .xp-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
-        .balance-box { background: #252536; padding: 8px 16px; border-radius: 20px; font-weight: bold; color: var(--gold); border: 1px solid #3e3e5e; }
-
-        /* Экраны */
-        .screen { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .screen { display: none; padding: 15px; }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
+        h2 { margin-bottom: 15px; font-size: 20px; }
 
-        /* СЕТКА КЕЙСОВ (3D ЯЩИКИ) */
-        .cases-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 20px; }
-        .case-card { background: var(--panel); border-radius: 16px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; position: relative; }
-        .case-card:active { transform: scale(0.96); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .box-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: 0.1s; }
+        .box-card:active { transform: scale(0.95); }
         
-        /* 3D Ящик на CSS */
-        .case-box { width: 80px; height: 70px; position: relative; margin-bottom: 15px; perspective: 100px; }
-        .box-body { width: 100%; height: 100%; position: absolute; bottom: 0; border-radius: 8px; border: 2px solid var(--box-color); background: linear-gradient(180deg, #1f1f2e, #0d0d14); box-shadow: inset 0 0 15px var(--box-color), 0 0 15px var(--box-color); display: flex; justify-content: center; align-items: center; font-size: 30px; }
-        .box-lid { width: 104%; height: 20px; position: absolute; top: 0; left: -2%; border-radius: 6px; border: 2px solid var(--box-color); background: #151520; box-shadow: 0 0 10px var(--box-color); z-index: 2; }
-        .box-stripe { width: 20px; height: 100%; background: var(--box-color); position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); opacity: 0.3; }
+        .box-icon { width: 80px; height: 80px; margin: 0 auto 10px; background: linear-gradient(180deg, #27272a, #09090b); border-radius: 12px; border: 2px solid var(--c); box-shadow: 0 0 15px var(--c), inset 0 0 10px var(--c); display: flex; justify-content: center; align-items: center; font-size: 40px; }
+        .box-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .box-price { background: #27272a; padding: 4px 10px; border-radius: 10px; font-size: 12px; color: #fbbf24; display: inline-block; }
 
-        .case-name { font-weight: 700; font-size: 13px; margin-bottom: 5px; text-align: center; }
-        .case-price { background: #252536; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; color: var(--gold); }
-
-        /* Нижнее меню */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
-        .nav-btn { background: none; border: none; color: #9ca3af; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .nav-btn.active { color: var(--accent); }
-        .nav-icon { font-size: 22px; }
-
-        /* РУЛЕТКА */
-        .roulette-wrapper { background: #000; border-radius: 16px; height: 120px; position: relative; overflow: hidden; margin: 30px 0; border: 2px solid var(--accent); }
-        .roulette-marker { position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #ef4444; z-index: 10; transform: translateX(-50%); box-shadow: 0 0 10px #ef4444; }
-        .roulette-track { display: flex; align-items: center; height: 100%; position: absolute; }
-        .roulette-item { min-width: 100px; height: 100px; margin: 0 5px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--panel); border: 1px solid #333; }
+        .roulette-container { height: 130px; background: #000; border: 2px solid #8b5cf6; border-radius: 12px; position: relative; overflow: hidden; margin: 30px 0; }
+        .marker { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: #ef4444; z-index: 10; transform: translateX(-50%); box-shadow: 0 0 10px #ef4444; }
+        .track { display: flex; height: 100%; align-items: center; position: absolute; }
+        .roll-item { min-width: 110px; height: 110px; margin: 0 5px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
         
-        /* NFT КАРТОЧКИ (Как в Telegram) */
-        .nft-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; background: #000; border: 2px solid var(--nft-color); box-shadow: 0 0 15px var(--nft-color); margin-bottom: 5px; }
+        .nft-img { width: 65px; height: 65px; border-radius: 50%; background: #000; border: 2px solid var(--c); box-shadow: 0 0 15px var(--c); margin-bottom: 5px; object-fit: contain; padding: 5px; }
         .nft-name { font-size: 10px; font-weight: bold; text-align: center; }
 
-        /* ИНВЕНТАРЬ */
-        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .inv-card { background: var(--panel); border-radius: 16px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; }
-        .inv-card .nft-icon { width: 70px; height: 70px; font-size: 35px; }
-        .inv-sell-btn { background: #ef4444; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; margin-top: 10px; }
+        .inv-item { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .inv-item .nft-img { width: 70px; height: 70px; }
+        .sell-btn { background: #ef4444; color: white; border: none; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; font-weight: bold; font-size: 12px; }
 
-        /* ЗАДАНИЯ И ПРОФИЛЬ */
-        .task-card { background: var(--panel); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .task-info h4 { font-size: 14px; margin-bottom: 4px; }
-        .task-reward { color: var(--gold); font-weight: bold; }
-        .profile-box { background: var(--panel); border-radius: 16px; padding: 20px; border: 1px solid var(--border); text-align: center; margin-bottom: 20px; }
-        .promo-input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; margin-top: 10px; text-align: center; }
-        .btn { background: linear-gradient(135deg, var(--accent), #6d28d9); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn { background: #8b5cf6; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #18181b; border-top: 1px solid #27272a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 10; }
+        .nav-btn { background: none; border: none; color: #71717a; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .nav-btn.active { color: #8b5cf6; }
+        .nav-btn span { font-size: 20px; }
+        
+        .task { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .input { width: 100%; padding: 12px; background: #000; border: 1px solid #27272a; color: white; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="user-level">
-            <div class="lvl-badge" id="user-level">Ур. 1</div>
-            <div style="display:flex; flex-direction:column; font-size:11px;">
-                <span>Опыт</span>
-                <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
-            </div>
-        </div>
-        <div class="balance-box"><span id="balance">1000</span> ⭐</div>
-    </header>
-
-    <div class="screen active" id="screen-cases">
-        <h2 class="section-title">Кейсы</h2>
-        <div class="cases-grid" id="cases-grid"></div>
+    <div class="header">
+        <div class="lvl" id="lvl">Ур. 1</div>
+        <div class="money"><span id="bal">1000</span> ⭐</div>
     </div>
 
-    <div class="screen" id="screen-roulette">
-        <h2 class="section-title" id="current-case-name">Открываем...</h2>
-        <div class="roulette-wrapper">
-            <div class="roulette-marker"></div>
-            <div class="roulette-track" id="roulette-track"></div>
+    <div class="screen active" id="screen-cases">
+        <h2>Коллекции</h2>
+        <div class="grid" id="cases-grid"></div>
+    </div>
+
+    <div class="screen" id="screen-roll">
+        <h2 id="roll-title">Открываем...</h2>
+        <div class="roulette-container">
+            <div class="marker"></div>
+            <div class="track" id="track"></div>
         </div>
-        <button class="btn hidden" id="claim-btn" onclick="finishOpening()">Забрать NFT</button>
+        <button class="btn hidden" id="claim-btn" onclick="claim()">Забрать NFT</button>
     </div>
 
     <div class="screen" id="screen-inv">
-        <h2 class="section-title">Инвентарь</h2>
-        <div class="inventory-grid" id="inventory-grid"></div>
+        <h2>Инвентарь</h2>
+        <div class="grid" id="inv-grid"></div>
     </div>
 
     <div class="screen" id="screen-tasks">
-        <h2 class="section-title">Задания</h2>
+        <h2>Задания</h2>
         <div id="tasks-list"></div>
     </div>
 
-    <div class="screen" id="screen-profile">
-        <h2 class="section-title">Профиль</h2>
-        <div class="profile-box">
-            <h3>Ввести промокод</h3>
-            <input type="text" class="promo-input" id="promo-input" placeholder="Введите код...">
-            <button class="btn" onclick="redeemPromo()">Активировать</button>
-        </div>
-        <div class="profile-box">
-            <h3>Трейды</h3>
-            <button class="btn" style="background:#2a2a3e;" onclick="alert('Трейды появятся, когда мы подключим сервер!')">Открыть Трейды</button>
-        </div>
+    <div class="screen" id="screen-prof">
+        <h2>Профиль</h2>
+        <input type="text" class="input" id="promo" placeholder="Промокод...">
+        <button class="btn" onclick="promo()">Активировать</button>
+        <button class="btn" style="background:#27272a; margin-top:20px;" onclick="alert('Трейды появятся позже!')">Трейды</button>
     </div>
 
-    <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="switchTab('cases', this)"><span class="nav-icon">📦</span>Кейсы</button>
-        <button class="nav-btn" onclick="switchTab('inv', this)"><span class="nav-icon">🎒</span>Инвентарь</button>
-        <button class="nav-btn" onclick="switchTab('tasks', this)"><span class="nav-icon">📋</span>Задания</button>
-        <button class="nav-btn" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span>Профиль</button>
-    </nav>
+    <div class="nav">
+        <button class="nav-btn active" onclick="tab('cases', this)"><span>📦</span>Кейсы</button>
+        <button class="nav-btn" onclick="tab('inv', this)"><span>🎒</span>Инвентарь</button>
+        <button class="nav-btn" onclick="tab('tasks', this)"><span>📋</span>Задания</button>
+        <button class="nav-btn" onclick="tab('prof', this)"><span>👤</span>Профиль</button>
+    </div>
 
     <script>
-        let player = { balance: 1000, xp: 0, level: 1, inventory: [], casesOpened: 0, promoUsed: false };
+        let p = { bal: 1000, lvl: 1, xp: 0, inv: [], promo: false };
 
-        // ЦВЕТА И НАЗВАНИЯ ДЛЯ NFT
-        const nftThemes = {
-            black: { name: 'Черный', color: '#6b7280', emoji: '🌑' },
-            white: { name: 'Белый', color: '#f3f4f6', emoji: '🌟' },
-            red: { name: 'Красный', color: '#ef4444', emoji: '🔥' },
-            blue: { name: 'Синий', color: '#3b82f6', emoji: '💧' },
-            green: { name: 'Зеленый', color: '#10b981', emoji: '🌿' },
-            gold: { name: 'Золотой', color: '#fbbf24', emoji: '👑' }
-        };
-        const rarities = ['Обычный', 'Необычный', 'Редкий', 'Эпический', 'Легендарный'];
-        
-        // КРУТЫЕ НАЗВАНИЯ ДЛЯ КЕЙСОВ
-        const customCaseNames = {
-            black: ['Ящик Мрака', 'Ящик Теней', 'Ящик Бездны', 'Ящик Демона', 'Ящик Космоса'],
-            white: ['Ящик Облаков', 'Ящик Снега', 'Ящик Ангела', 'Ящик Света', 'Ящик Божества'],
-            red: ['Ящик Искры', 'Ящик Пламени', 'Ящик Вулкана', 'Ящик Дракона', 'Ящик Ада'],
-            blue: ['Ящик Капли', 'Ящик Льда', 'Ящик Моря', 'Ящик Глубин', 'Ящик Кристалла'],
-            green: ['Ящик Травы', 'Ящик Леса', 'Ящик Яда', 'Ящик Мутанта', 'Ящик Древних'],
-            gold: ['Ящик Бронзы', 'Ящик Серебра', 'Ящик Золота', 'Ящик Короля', 'Ящик Императора']
-        };
-
-        // ГЕНЕРАТОР 30 КЕЙСОВ
-        const cases = [];
-        let idCounter = 1;
-        Object.keys(nftThemes).forEach(themeKey => {
-            const theme = nftThemes[themeKey];
-            for(let i=0; i<5; i++) {
-                const price = Math.floor(25 * Math.pow(2.5, i)) + (themeKey === 'gold' ? 500 : 0);
-                cases.push({
-                    id: idCounter++,
-                    name: customCaseNames[themeKey][i],
-                    theme: themeKey,
-                    color: theme.color,
-                    price: price,
-                    rarity: rarities[i]
-                });
-            }
-        });
-
-        const tasks = [
-            { id: 'd1', text: 'Открой 5 кейсов', target: 5, reward: 100, type: 'open', current: 0 },
-            { id: 'd2', text: 'Продай 3 NFT', target: 3, reward: 50, type: 'sell', current: 0 },
-            { id: 'a1', text: 'Собери 10 NFT', target: 10, reward: 200, type: 'inv', current: 0 }
+        // 30 РАЗНЫХ ЯЩИКОВ (Каждый со своей темой и NFT)
+        const allCases = [
+            // 1. Кошки
+            { id: 'cats', name: 'Ящик Кошек', price: 50, icon: '🐱', color: '#f59e0b', drops: [
+                { name: 'Сфинкс', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Британец', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Мейн-кун', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Черный Кот', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 2. Собаки
+            { id: 'dogs', name: 'Ящик Собак', price: 50, icon: '🐶', color: '#b45309', drops: [
+                { name: 'Корги', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Хаски', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Доберман', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Бульдог', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 3. Цветы
+            { id: 'flowers', name: 'Ящик Цветов', price: 80, icon: '🌸', color: '#ec4899', drops: [
+                { name: 'Роза', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Тюльпан', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Сакура', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Орхидея', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 4. Космос
+            { id: 'space', name: 'Ящик Космоса', price: 100, icon: '🚀', color: '#8b5cf6', drops: [
+                { name: 'Планета', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Ракета', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Луна', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Галактика', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 5. Океан
+            { id: 'ocean', name: 'Ящик Океана', price: 100, icon: '🌊', color: '#3b82f6', drops: [
+                { name: 'Дельфин', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Акула', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Кит', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Осьминог', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 6. Драконы
+            { id: 'dragons', name: 'Ящик Драконов', price: 150, icon: '🐉', color: '#ef4444', drops: [
+                { name: 'Огнедышащий', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Ледяной', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Теневой', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Золотой', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 7. Еда
+            { id: 'food', name: 'Ящик Еды', price: 40, icon: '🍕', color: '#f97316', drops: [
+                { name: 'Пицца', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Бургер', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Суши', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Торт', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 8. Сокровища
+            { id: 'treasure', name: 'Ящик Сокровищ', price: 200, icon: '💎', color: '#10b981', drops: [
+                { name: 'Алмаз', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Изумруд', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Рубин', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Сапфир', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 9. Милашки
+            { id: 'cuties', name: 'Ящик Милашек', price: 80, icon: '🧸', color: '#f472b6', drops: [
+                { name: 'Мишка', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Кролик', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Панда', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Коала', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 10. Магия
+            { id: 'magic', name: 'Ящик Магии', price: 120, icon: '🔮', color: '#a855f7', drops: [
+                { name: 'Шар', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Зелье', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Посох', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Гримуар', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 11. Автомобили
+            { id: 'cars', name: 'Ящик Тачек', price: 300, icon: '🚗', color: '#ef4444', drops: [
+                { name: 'Тесла', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Феррари', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Ламбо', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Порше', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 12. Техника
+            { id: 'tech', name: 'Ящик Техники', price: 250, icon: '📱', color: '#64748b', drops: [
+                { name: 'iPhone', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'MacBook', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'PlayStation', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Наушники', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 13. Сова
+            { id: 'owls', name: 'Ящик Сов', price: 110, icon: '🦉', color: '#d97706', drops: [
+                { name: 'Белая Сова', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Сипуха', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Филин', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Неясыть', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 14. Кролики
+            { id: 'rabbits', name: 'Ящик Кроликов', price: 70, icon: '🐰', color: '#fbcfe8', drops: [
+                { name: 'Белый', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Серый', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Черный', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Розовый', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 15. Монеты
+            { id: 'coins', name: 'Ящик Монет', price: 180, icon: '🪙', color: '#fbbf24', drops: [
+                { name: 'Бронза', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Серебро', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Золото', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Платина', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 16. Рыбы
+            { id: 'fish', name: 'Ящик Рыб', price: 60, icon: '🐟', color: '#0ea5e9', drops: [
+                { name: 'Клоун', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Скалярия', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Золотая', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Меченосец', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 17. Птицы
+            { id: 'birds', name: 'Ящик Птиц', price: 90, icon: '🦜', color: '#10b981', drops: [
+                { name: 'Попугай', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Орел', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Феникс', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Сокол', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 18. Фрукты
+            { id: 'fruits', name: 'Ящик Фруктов', price: 30, icon: '🍎', color: '#ef4444', drops: [
+                { name: 'Яблоко', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Банан', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Апельсин', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Виноград', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 19. Сердца
+            { id: 'hearts', name: 'Ящик Сердец', price: 150, icon: '❤️', color: '#dc2626', drops: [
+                { name: 'Красное', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Розовое', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Золотое', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Черное', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 20. Грибы
+            { id: 'mushrooms', name: 'Ящик Грибов', price: 45, icon: '🍄', color: '#f87171', drops: [
+                { name: 'Мухомор', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Белый', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Лисичка', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Поганка', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 21. Оружие
+            { id: 'weapons', name: 'Ящик Оружия', price: 500, icon: '⚔️', color: '#94a3b8', drops: [
+                { name: 'Меч', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Топор', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Лук', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Копье', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 22. Напитки
+            { id: 'drinks', name: 'Ящик Напитков', price: 35, icon: '☕', color: '#78350f', drops: [
+                { name: 'Кофе', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Чай', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Кола', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Сок', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 23. Одежда
+            { id: 'clothes', name: 'Ящик Одежды', price: 220, icon: '👕', color: '#60a5fa', drops: [
+                { name: 'Футболка', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Худи', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Кроссовки', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Кепка', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 24. Погода
+            { id: 'weather', name: 'Ящик Погоды', price: 130, icon: '⛅', color: '#94a3b8', drops: [
+                { name: 'Солнце', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Дождь', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Снег', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Молния', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 25. Насекомые
+            { id: 'insects', name: 'Ящик Насекомых', price: 55, icon: '🐞', color: '#ef4444', drops: [
+                { name: 'Божья Коровка', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Бабочка', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Пчела', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Муравей', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 26. Праздники
+            { id: 'holiday', name: 'Ящик Праздника', price: 170, icon: '🎄', color: '#10b981', drops: [
+                { name: 'Санта', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Тыква', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Яйцо', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Елка', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 27. Королевство
+            { id: 'royal', name: 'Ящик Короля', price: 600, icon: '👑', color: '#fbbf24', drops: [
+                { name: 'Корона', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Скипетр', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Трон', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Мантия', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 28. Акулы
+            { id: 'sharks', name: 'Ящик Акул', price: 140, icon: '🦈', color: '#64748b', drops: [
+                { name: 'Тигровая', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Белая', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Молот', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Китовая', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 29. Мифические
+            { id: 'mythic', name: 'Ящик Мифов', price: 800, icon: '🐦‍🔥', color: '#a855f7', drops: [
+                { name: 'Феникс', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Грифон', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Единорог', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Пегас', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]},
+            // 30. Легендарный
+            { id: 'legendary', name: 'Ящик Легенд', price: 1000, icon: '🏆', color: '#fde047', drops: [
+                { name: 'Кубок', img: 'https://i.imgur.com/kYm3jR1.png' },
+                { name: 'Медаль', img: 'https://i.imgur.com/8YwX5Z4.png' },
+                { name: 'Звезда', img: 'https://i.imgur.com/2PqX8m3.png' },
+                { name: 'Алмаз', img: 'https://i.imgur.com/6XqZ4w8.png' }
+            ]}
         ];
 
-        function updateUI() {
-            document.getElementById('balance').innerText = player.balance;
-            document.getElementById('user-level').innerText = `Ур. ${player.level}`;
-            const xpNeeded = player.level * 100;
-            document.getElementById('xp-fill').style.width = `${Math.min(100, (player.xp / xpNeeded) * 100)}%`;
-            if (player.promoUsed) {
-                document.getElementById('promo-input').disabled = true;
-                document.getElementById('promo-input').placeholder = "Код активирован";
-            }
+        function upd() {
+            document.getElementById('bal').innerText = p.bal;
+            document.getElementById('lvl').innerText = `Ур. ${p.lvl}`;
         }
 
-        function addXP(amount) {
-            player.xp += amount;
-            const xpNeeded = player.level * 100;
-            if (player.xp >= xpNeeded) {
-                player.xp -= xpNeeded;
-                player.level++;
-                player.balance += player.level * 50;
-                alert(`🎉 Новый уровень! Вы достигли Ур. ${player.level} и получили ${player.level * 50} ⭐`);
-            }
-            updateUI();
-        }
-
-        function switchTab(tab, btn) {
+        function tab(name, btn) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`screen-${tab}`).classList.add('active');
+            document.getElementById('screen-' + name).classList.add('active');
             btn.classList.add('active');
-
-            if (tab === 'inv') renderInventory();
-            if (tab === 'tasks') renderTasks();
+            if (name === 'inv') drawInv();
+            if (name === 'tasks') drawTasks();
         }
 
-        // РЕНДЕР ЯЩИКОВ
-        function renderCases() {
-            const grid = document.getElementById('cases-grid');
-            grid.innerHTML = cases.map(c => `
-                <div class="case-card" style="--box-color: ${c.color};" onclick="startOpening(${c.id})">
-                    <div class="case-box">
-                        <div class="box-lid"></div>
-                        <div class="box-body">
-                            <div class="box-stripe"></div>
-                            📦
-                        </div>
-                    </div>
-                    <div class="case-name">${c.name}</div>
-                    <div class="case-price">${c.price} ⭐</div>
+        function drawCases() {
+            document.getElementById('cases-grid').innerHTML = allCases.map(c => `
+                <div class="box-card" style="--c: ${c.color}" onclick="openCase('${c.id}')">
+                    <div class="box-icon">${c.icon}</div>
+                    <div class="box-title">${c.name}</div>
+                    <div class="box-price">${c.price} ⭐</div>
                 </div>
             `).join('');
         }
 
-        let currentWin = null;
-        let currentCasePrice = 0;
+        let win = null;
+        let cost = 0;
 
-        function startOpening(id) {
-            const c = cases.find(x => x.id === id);
-            if (player.balance < c.price) return alert('Недостаточно звезд!');
-            
-            player.balance -= c.price;
-            currentCasePrice = c.price;
-            updateUI();
+        function openCase(id) {
+            let c = allCases.find(x => x.id === id);
+            if (p.bal < c.price) return alert('Мало звезд!');
+            p.bal -= c.price; cost = c.price; upd();
             
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-roulette').classList.add('active');
-            document.getElementById('current-case-name').innerText = `Открываем: ${c.name}`;
+            document.getElementById('screen-roll').classList.add('active');
+            document.getElementById('roll-title').innerText = `Открываем: ${c.name}`;
             document.getElementById('claim-btn').classList.add('hidden');
-
-            const track = document.getElementById('roulette-track');
+            
+            let track = document.getElementById('track');
             track.innerHTML = '';
             track.style.transition = 'none';
             track.style.transform = 'translateX(0)';
-
-            const theme = nftThemes[c.theme];
-
-            // Крутим 40 NFT карточек
-            for (let i = 0; i < 40; i++) {
-                const el = document.createElement('div');
-                el.className = 'roulette-item';
-                el.innerHTML = `
-                    <div class="nft-icon" style="--nft-color: ${theme.color};">${theme.emoji}</div>
-                    <div class="nft-name" style="color:${theme.color}">${c.rarity}</div>
-                `;
-                track.appendChild(el);
-            }
-
-            // Наш выигрыш
-            currentWin = { name: c.name, rarity: c.rarity, value: c.price, theme: c.theme, emoji: theme.emoji };
             
-            // Подсвечиваем выигрышный элемент (35-й)
-            const winIndex = 35;
-            track.children[winIndex].style.transform = 'scale(1.1)';
-            track.children[winIndex].style.border = '2px solid #fff';
-            track.children[winIndex].style.boxShadow = '0 0 20px #fff';
-
+            // Заполняем рулетку случайными дропами из этого ящика
+            for (let i = 0; i < 40; i++) {
+                let randDrop = c.drops[Math.floor(Math.random() * c.drops.length)];
+                track.innerHTML += `
+                    <div class="roll-item">
+                        <img src="${randDrop.img}" class="nft-img" style="--c: ${c.color}">
+                        <div class="nft-name" style="color: ${c.color}">${randDrop.name}</div>
+                    </div>
+                `;
+            }
+            
+            // Наш выигрыш
+            win = c.drops[Math.floor(Math.random() * c.drops.length)];
+            let wIdx = 35;
+            track.children[wIdx].innerHTML = `
+                <img src="${win.img}" class="nft-img" style="--c: #fff; box-shadow: 0 0 20px #fff;">
+                <div class="nft-name" style="color: #fff">${win.name}</div>
+            `;
+            track.children[wIdx].style.border = '2px solid #fff';
+            
             setTimeout(() => {
-                const itemWidth = 110;
-                const centerOffset = (track.parentElement.offsetWidth / 2) - (itemWidth / 2);
-                const stopPos = -((winIndex * itemWidth) - centerOffset);
-                track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.15, 1)';
-                track.style.transform = `translateX(${stopPos}px)`;
+                let w = track.parentElement.offsetWidth;
+                let itemW = 120;
+                let center = (w / 2) - (itemW / 2);
+                let stop = -((wIdx * itemW) - center);
+                track.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)';
+                track.style.transform = `translateX(${stop}px)`;
             }, 50);
-
+            
             setTimeout(() => {
                 document.getElementById('claim-btn').classList.remove('hidden');
-            }, 4200);
+            }, 4100);
         }
 
-        function finishOpening() {
-            player.inventory.push(currentWin);
-            player.casesOpened++;
-            addXP(Math.floor(currentCasePrice / 2));
-            checkTaskProgress('open', 1);
+        function claim() {
+            p.inv.push({ name: win.name, img: win.img, val: cost });
+            p.xp += Math.floor(cost / 2);
             
-            alert(`Вы выиграли NFT: ${currentWin.emoji} ${currentWin.name}!`);
-            
-            // Возвращаемся на главную
+            if (p.xp >= p.lvl * 100) {
+                p.xp -= p.lvl * 100;
+                p.lvl++;
+                p.bal += p.lvl * 50;
+                alert('Новый уровень! Бонус: ' + (p.lvl * 50) + '⭐');
+            }
+            upd();
+            alert(`Вы получили NFT: ${win.name}!`);
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-cases').classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+            document.querySelectorAll('.nav-btn')[0].classList.add('active');
         }
 
-        // ИНВЕНТАРЬ
-        function renderInventory() {
-            const grid = document.getElementById('inventory-grid');
-            if (player.inventory.length === 0) {
-                grid.innerHTML = '<p style="grid-column: span 2; color: #666; text-align:center;">Пусто. Открывай кейсы!</p>';
+        function drawInv() {
+            if (p.inv.length === 0) {
+                document.getElementById('inv-grid').innerHTML = '<p style="grid-column:span 2; text-align:center; color:#666;">Пусто</p>';
                 return;
             }
-            grid.innerHTML = player.inventory.map((item, i) => {
-                const t = nftThemes[item.theme];
-                return `
-                <div class="inv-card">
-                    <div class="nft-icon" style="--nft-color: ${t.color};">${t.emoji}</div>
-                    <div style="font-size:12px; font-weight:bold; text-align:center; margin-top:5px;">${item.name}</div>
-                    <div style="font-size:10px; color:#888; margin:4px 0;">${item.rarity}</div>
-                    <button class="inv-sell-btn" onclick="sellItem(${i})">Продать ${Math.floor(item.value * 0.5)} ⭐</button>
-                </div>`;
-            }).join('');
-        }
-
-        function sellItem(index) {
-            const item = player.inventory[index];
-            if(confirm(`Продать ${item.name} за ${Math.floor(item.value * 0.5)} ⭐?`)) {
-                player.balance += Math.floor(item.value * 0.5);
-                player.inventory.splice(index, 1);
-                checkTaskProgress('sell', 1);
-                updateUI();
-                renderInventory();
-            }
-        }
-
-        // ЗАДАНИЯ
-        function renderTasks() {
-            document.getElementById('tasks-list').innerHTML = tasks.map(t => `
-                <div class="task-card">
-                    <div class="task-info">
-                        <h4>${t.text}</h4>
-                        <div style="font-size:12px; color:#888;">Прогресс: ${t.current}/${t.target}</div>
-                    </div>
-                    <div class="task-reward">+${t.reward} ⭐</div>
+            document.getElementById('inv-grid').innerHTML = p.inv.map((item, i) => `
+                <div class="inv-item">
+                    <img src="${item.img}" class="nft-img">
+                    <div class="box-title" style="margin-top:5px;">${item.name}</div>
+                    <button class="sell-btn" onclick="sell(${i})">Продать ${Math.floor(item.val * 0.5)} ⭐</button>
                 </div>
             `).join('');
         }
 
-        function checkTaskProgress(type, amount) {
-            let completed = false;
-            tasks.forEach(t => {
-                if(t.type === type && t.current < t.target) {
-                    t.current += amount;
-                    if(t.current >= t.target) {
-                        player.balance += t.reward;
-                        completed = true;
-                    }
-                }
-            });
-            if(completed) {
-                updateUI();
-                alert('🎁 Вы выполнили задание и получили награду!');
-            }
+        function sell(i) {
+            p.bal += Math.floor(p.inv[i].val * 0.5);
+            p.inv.splice(i, 1);
+            upd();
+            drawInv();
         }
 
-        // ПРОМОКОД
-        function redeemPromo() {
-            const code = document.getElementById('promo-input').value.trim().toUpperCase();
-            if(code === 'SHARF' && !player.promoUsed) {
-                player.promoUsed = true;
-                player.balance += 2000;
-                addXP(100);
-                alert('✅ Промокод активирован! Вы получили 2000⭐ и 100 XP.');
-                updateUI();
-                document.getElementById('promo-input').value = '';
-            } else if (player.promoUsed) {
-                alert('Вы уже использовали этот промокод!');
+        let tasks = [
+            { t: 'Открой 5 кейсов', max: 5, cur: 0, rew: 100 },
+            { t: 'Собери 10 NFT', max: 10, cur: 0, rew: 200 }
+        ];
+
+        function drawTasks() {
+            document.getElementById('tasks-list').innerHTML = tasks.map(x => `
+                <div class="task">
+                    <div>
+                        <div style="font-weight:bold; margin-bottom:5px;">${x.t}</div>
+                        <div style="font-size:12px; color:#888;">${x.cur}/${x.max}</div>
+                    </div>
+                    <div style="color:#fbbf24; font-weight:bold;">+${x.rew} ⭐</div>
+                </div>
+            `).join('');
+        }
+
+        function promo() {
+            let val = document.getElementById('promo').value.toUpperCase();
+            if (val === 'SHARF' && !p.promo) {
+                p.promo = true;
+                p.bal += 2000;
+                upd();
+                alert('Промокод активирован! +2000 ⭐');
+                document.getElementById('promo').value = '';
             } else {
-                alert('❌ Неверный промокод!');
+                alert('Неверный код или уже использован!');
             }
         }
 
-        renderCases();
-        updateUI();
+        drawCases();
+        upd();
     </script>
 </body>
 </html>
