@@ -5,38 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NFT Кейсы</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем SDK Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="header">
-        <div class="balance">Баланс: <span id="balance">100</span> ⭐</div>
+    <!-- Верхняя панель -->
+    <header class="top-bar">
+        <div class="user-info">
+            <span class="avatar">👤</span>
+            <span class="username">Игрок</span>
+        </div>
+        <div class="balance-box">
+            <span id="balance">1000</span> ⭐
+        </div>
+    </header>
+
+    <!-- Главный экран (Кейсы) -->
+    <div class="screen active" id="main-screen">
+        <h2 class="section-title">Выбери кейс</h2>
+        <div class="cases-grid" id="cases-grid">
+            <!-- Кейсы будут вставлены через JS -->
+        </div>
+        <button class="btn-collection" onclick="showCollection()">🎒 Моя коллекция</button>
     </div>
 
-    <div class="main-screen" id="main-screen">
-        <h1>Открывай кейсы!</h1>
-        <div class="case" onclick="openCase()">
-            <div class="case-icon">🎁</div>
-            <div class="case-name">Базовый кейс</div>
-            <div class="case-price">25 ⭐</div>
+    <!-- Экран рулетки -->
+    <div class="screen hidden" id="roulette-screen">
+        <h2 id="current-case-name">Открываем...</h2>
+        <div class="roulette-wrapper">
+            <div class="roulette-marker"></div>
+            <div class="roulette-track" id="roulette-track">
+                <!-- Элементы рулетки -->
+            </div>
         </div>
-        <button class="btn" onclick="showCollection()">Моя коллекция</button>
-    </div>
-
-    <!-- Экран анимации -->
-    <div class="roulette-screen hidden" id="roulette-screen">
-        <div class="roulette-container">
-            <div class="roulette-line"></div>
-            <div class="roulette-items" id="roulette-items"></div>
-        </div>
-        <p>Открываем...</p>
+        <button class="btn-main hidden" id="claim-btn" onclick="finishOpening()">Забрать</button>
     </div>
 
     <!-- Экран коллекции -->
-    <div class="collection-screen hidden" id="collection-screen">
-        <h2>Коллекция</h2>
-        <div class="inventory" id="inventory"></div>
-        <button class="btn" onclick="showMain()">Назад</button>
+    <div class="screen hidden" id="collection-screen">
+        <h2 class="section-title">Мои NFT</h2>
+        <div class="inventory-grid" id="inventory-grid"></div>
+        <button class="btn-main" onclick="showMain()">Назад к кейсам</button>
     </div>
 
     <script src="app.js"></script>
