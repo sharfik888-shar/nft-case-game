@@ -30,11 +30,11 @@
         .track { display: flex; height: 100%; align-items: center; position: absolute; }
         .roll-item { min-width: 110px; height: 110px; margin: 0 5px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
         
-        .nft-img { width: 65px; height: 65px; border-radius: 50%; background: #000; border: 2px solid var(--c); box-shadow: 0 0 15px var(--c); margin-bottom: 5px; display: flex; justify-content: center; align-items: center; }
+        .nft-img { width: 65px; height: 65px; border-radius: 50%; background: #000; border: 2px solid var(--c); box-shadow: 0 0 15px var(--c); margin-bottom: 5px; display: flex; justify-content: center; align-items: center; font-size: 35px; }
         .nft-name { font-size: 10px; font-weight: bold; text-align: center; }
 
         .inv-item { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .inv-item .nft-img { width: 70px; height: 70px; }
+        .inv-item .nft-img { width: 70px; height: 70px; font-size: 40px; }
         .sell-btn { background: #ef4444; color: white; border: none; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; font-weight: bold; font-size: 12px; }
 
         .btn { background: #8b5cf6; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
@@ -95,72 +95,38 @@
     <script>
         let p = { bal: 1000, lvl: 1, xp: 0, inv: [], promo: false };
 
-        // ВСТРОЕННЫЕ КАРТИНКИ (SVG), КОТОРЫЕ НИКОГДА НЕ СЛОМАЮТСЯ
-        const icons = {
-            cat: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐱</text></svg>',
-            dog: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐶</text></svg>',
-            flower: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🌸</text></svg>',
-            rocket: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🚀</text></svg>',
-            drop: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">💧</text></svg>',
-            dragon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐉</text></svg>',
-            pizza: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🍕</text></svg>',
-            gem: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">💎</text></svg>',
-            bear: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🧸</text></svg>',
-            magic: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🔮</text></svg>',
-            car: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🚗</text></svg>',
-            phone: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">📱</text></svg>',
-            owl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🦉</text></svg>',
-            rabbit: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐰</text></svg>',
-            coin: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🪙</text></svg>',
-            fish: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐟</text></svg>',
-            bird: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🦜</text></svg>',
-            apple: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🍎</text></svg>',
-            heart: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">❤️</text></svg>',
-            mushroom: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🍄</text></svg>',
-            sword: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">⚔️</text></svg>',
-            coffee: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">☕</text></svg>',
-            shirt: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">👕</text></svg>',
-            sun: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">☀️</text></svg>',
-            bug: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🐞</text></svg>',
-            tree: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🎄</text></svg>',
-            crown: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">👑</text></svg>',
-            shark: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🦈</text></svg>',
-            phoenix: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🦅</text></svg>',
-            trophy: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">🏆</text></svg>',
-            star: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="70" text-anchor="middle" x="50">⭐</text></svg>'
-        };
-
+        // 30 УНИКАЛЬНЫХ ЯЩИКОВ (С эмодзи вместо картинок)
         const allCases = [
-            { id: 'cats', name: 'Ящик Кошек', price: 50, icon: '🐱', color: '#f59e0b', drops: [ { name: 'Сфинкс', img: icons.cat }, { name: 'Британец', img: icons.cat }, { name: 'Мейн-кун', img: icons.cat }, { name: 'Черный Кот', img: icons.cat } ]},
-            { id: 'dogs', name: 'Ящик Собак', price: 50, icon: '🐶', color: '#b45309', drops: [ { name: 'Корги', img: icons.dog }, { name: 'Хаски', img: icons.dog }, { name: 'Доберман', img: icons.dog }, { name: 'Бульдог', img: icons.dog } ]},
-            { id: 'flowers', name: 'Ящик Цветов', price: 80, icon: '🌸', color: '#ec4899', drops: [ { name: 'Роза', img: icons.flower }, { name: 'Тюльпан', img: icons.flower }, { name: 'Сакура', img: icons.flower }, { name: 'Орхидея', img: icons.flower } ]},
-            { id: 'space', name: 'Ящик Космоса', price: 100, icon: '🚀', color: '#8b5cf6', drops: [ { name: 'Планета', img: icons.rocket }, { name: 'Ракета', img: icons.rocket }, { name: 'Луна', img: icons.rocket }, { name: 'Галактика', img: icons.rocket } ]},
-            { id: 'ocean', name: 'Ящик Океана', price: 100, icon: '🌊', color: '#3b82f6', drops: [ { name: 'Дельфин', img: icons.drop }, { name: 'Акула', img: icons.drop }, { name: 'Кит', img: icons.drop }, { name: 'Осьминог', img: icons.drop } ]},
-            { id: 'dragons', name: 'Ящик Драконов', price: 150, icon: '🐉', color: '#ef4444', drops: [ { name: 'Огнедышащий', img: icons.dragon }, { name: 'Ледяной', img: icons.dragon }, { name: 'Теневой', img: icons.dragon }, { name: 'Золотой', img: icons.dragon } ]},
-            { id: 'food', name: 'Ящик Еды', price: 40, icon: '🍕', color: '#f97316', drops: [ { name: 'Пицца', img: icons.pizza }, { name: 'Бургер', img: icons.pizza }, { name: 'Суши', img: icons.pizza }, { name: 'Торт', img: icons.pizza } ]},
-            { id: 'treasure', name: 'Ящик Сокровищ', price: 200, icon: '💎', color: '#10b981', drops: [ { name: 'Алмаз', img: icons.gem }, { name: 'Изумруд', img: icons.gem }, { name: 'Рубин', img: icons.gem }, { name: 'Сапфир', img: icons.gem } ]},
-            { id: 'cuties', name: 'Ящик Милашек', price: 80, icon: '🧸', color: '#f472b6', drops: [ { name: 'Мишка', img: icons.bear }, { name: 'Кролик', img: icons.bear }, { name: 'Панда', img: icons.bear }, { name: 'Коала', img: icons.bear } ]},
-            { id: 'magic', name: 'Ящик Магии', price: 120, icon: '🔮', color: '#a855f7', drops: [ { name: 'Шар', img: icons.magic }, { name: 'Зелье', img: icons.magic }, { name: 'Посох', img: icons.magic }, { name: 'Гримуар', img: icons.magic } ]},
-            { id: 'cars', name: 'Ящик Тачек', price: 300, icon: '🚗', color: '#ef4444', drops: [ { name: 'Тесла', img: icons.car }, { name: 'Феррари', img: icons.car }, { name: 'Ламбо', img: icons.car }, { name: 'Порше', img: icons.car } ]},
-            { id: 'tech', name: 'Ящик Техники', price: 250, icon: '📱', color: '#64748b', drops: [ { name: 'iPhone', img: icons.phone }, { name: 'MacBook', img: icons.phone }, { name: 'PlayStation', img: icons.phone }, { name: 'Наушники', img: icons.phone } ]},
-            { id: 'owls', name: 'Ящик Сов', price: 110, icon: '🦉', color: '#d97706', drops: [ { name: 'Белая Сова', img: icons.owl }, { name: 'Сипуха', img: icons.owl }, { name: 'Филин', img: icons.owl }, { name: 'Неясыть', img: icons.owl } ]},
-            { id: 'rabbits', name: 'Ящик Кроликов', price: 70, icon: '🐰', color: '#fbcfe8', drops: [ { name: 'Белый', img: icons.rabbit }, { name: 'Серый', img: icons.rabbit }, { name: 'Черный', img: icons.rabbit }, { name: 'Розовый', img: icons.rabbit } ]},
-            { id: 'coins', name: 'Ящик Монет', price: 180, icon: '🪙', color: '#fbbf24', drops: [ { name: 'Бронза', img: icons.coin }, { name: 'Серебро', img: icons.coin }, { name: 'Золото', img: icons.coin }, { name: 'Платина', img: icons.coin } ]},
-            { id: 'fish', name: 'Ящик Рыб', price: 60, icon: '🐟', color: '#0ea5e9', drops: [ { name: 'Клоун', img: icons.fish }, { name: 'Скалярия', img: icons.fish }, { name: 'Золотая', img: icons.fish }, { name: 'Меченосец', img: icons.fish } ]},
-            { id: 'birds', name: 'Ящик Птиц', price: 90, icon: '🦜', color: '#10b981', drops: [ { name: 'Попугай', img: icons.bird }, { name: 'Орел', img: icons.bird }, { name: 'Феникс', img: icons.bird }, { name: 'Сокол', img: icons.bird } ]},
-            { id: 'fruits', name: 'Ящик Фруктов', price: 30, icon: '🍎', color: '#ef4444', drops: [ { name: 'Яблоко', img: icons.apple }, { name: 'Банан', img: icons.apple }, { name: 'Апельсин', img: icons.apple }, { name: 'Виноград', img: icons.apple } ]},
-            { id: 'hearts', name: 'Ящик Сердец', price: 150, icon: '❤️', color: '#dc2626', drops: [ { name: 'Красное', img: icons.heart }, { name: 'Розовое', img: icons.heart }, { name: 'Золотое', img: icons.heart }, { name: 'Черное', img: icons.heart } ]},
-            { id: 'mushrooms', name: 'Ящик Грибов', price: 45, icon: '🍄', color: '#f87171', drops: [ { name: 'Мухомор', img: icons.mushroom }, { name: 'Белый', img: icons.mushroom }, { name: 'Лисичка', img: icons.mushroom }, { name: 'Поганка', img: icons.mushroom } ]},
-            { id: 'weapons', name: 'Ящик Оружия', price: 500, icon: '⚔️', color: '#94a3b8', drops: [ { name: 'Меч', img: icons.sword }, { name: 'Топор', img: icons.sword }, { name: 'Лук', img: icons.sword }, { name: 'Копье', img: icons.sword } ]},
-            { id: 'drinks', name: 'Ящик Напитков', price: 35, icon: '☕', color: '#78350f', drops: [ { name: 'Кофе', img: icons.coffee }, { name: 'Чай', img: icons.coffee }, { name: 'Кола', img: icons.coffee }, { name: 'Сок', img: icons.coffee } ]},
-            { id: 'clothes', name: 'Ящик Одежды', price: 220, icon: '👕', color: '#60a5fa', drops: [ { name: 'Футболка', img: icons.shirt }, { name: 'Худи', img: icons.shirt }, { name: 'Кроссовки', img: icons.shirt }, { name: 'Кепка', img: icons.shirt } ]},
-            { id: 'weather', name: 'Ящик Погоды', price: 130, icon: '⛅', color: '#94a3b8', drops: [ { name: 'Солнце', img: icons.sun }, { name: 'Дождь', img: icons.sun }, { name: 'Снег', img: icons.sun }, { name: 'Молния', img: icons.sun } ]},
-            { id: 'insects', name: 'Ящик Насекомых', price: 55, icon: '🐞', color: '#ef4444', drops: [ { name: 'Божья Коровка', img: icons.bug }, { name: 'Бабочка', img: icons.bug }, { name: 'Пчела', img: icons.bug }, { name: 'Муравей', img: icons.bug } ]},
-            { id: 'holiday', name: 'Ящик Праздника', price: 170, icon: '🎄', color: '#10b981', drops: [ { name: 'Санта', img: icons.tree }, { name: 'Тыква', img: icons.tree }, { name: 'Яйцо', img: icons.tree }, { name: 'Елка', img: icons.tree } ]},
-            { id: 'royal', name: 'Ящик Короля', price: 600, icon: '👑', color: '#fbbf24', drops: [ { name: 'Корона', img: icons.crown }, { name: 'Скипетр', img: icons.crown }, { name: 'Трон', img: icons.crown }, { name: 'Мантия', img: icons.crown } ]},
-            { id: 'sharks', name: 'Ящик Акул', price: 140, icon: '🦈', color: '#64748b', drops: [ { name: 'Тигровая', img: icons.shark }, { name: 'Белая', img: icons.shark }, { name: 'Молот', img: icons.shark }, { name: 'Китовая', img: icons.shark } ]},
-            { id: 'mythic', name: 'Ящик Мифов', price: 800, icon: '🦅', color: '#a855f7', drops: [ { name: 'Феникс', img: icons.phoenix }, { name: 'Грифон', img: icons.phoenix }, { name: 'Единорог', img: icons.phoenix }, { name: 'Пегас', img: icons.phoenix } ]},
-            { id: 'legendary', name: 'Ящик Легенд', price: 1000, icon: '🏆', color: '#fde047', drops: [ { name: 'Кубок', img: icons.trophy }, { name: 'Медаль', img: icons.trophy }, { name: 'Звезда', img: icons.star }, { name: 'Алмаз', img: icons.trophy } ]}
+            { id: 'cats', name: 'Ящик Кошек', price: 50, icon: '🐱', color: '#f59e0b', drops: [ { name: 'Сфинкс', emoji: '🐈' }, { name: 'Британец', emoji: '🐈‍⬛' }, { name: 'Мейн-кун', emoji: '🐱' }, { name: 'Кот', emoji: '😺' } ]},
+            { id: 'dogs', name: 'Ящик Собак', price: 50, icon: '🐶', color: '#b45309', drops: [ { name: 'Корги', emoji: '🐕' }, { name: 'Хаски', emoji: '🐺' }, { name: 'Доберман', emoji: '🐕‍🦺' }, { name: 'Бульдог', emoji: '🐶' } ]},
+            { id: 'flowers', name: 'Ящик Цветов', price: 80, icon: '🌸', color: '#ec4899', drops: [ { name: 'Роза', emoji: '🌹' }, { name: 'Тюльпан', emoji: '🌷' }, { name: 'Сакура', emoji: '🌸' }, { name: 'Орхидея', emoji: '🌺' } ]},
+            { id: 'space', name: 'Ящик Космоса', price: 100, icon: '🚀', color: '#8b5cf6', drops: [ { name: 'Планета', emoji: '🪐' }, { name: 'Ракета', emoji: '🚀' }, { name: 'Луна', emoji: '🌙' }, { name: 'Галактика', emoji: '🌌' } ]},
+            { id: 'ocean', name: 'Ящик Океана', price: 100, icon: '🌊', color: '#3b82f6', drops: [ { name: 'Дельфин', emoji: '🐬' }, { name: 'Акула', emoji: '🦈' }, { name: 'Кит', emoji: '🐋' }, { name: 'Осьминог', emoji: '🐙' } ]},
+            { id: 'dragons', name: 'Ящик Драконов', price: 150, icon: '🐉', color: '#ef4444', drops: [ { name: 'Огнедышащий', emoji: '🔥' }, { name: 'Ледяной', emoji: '❄️' }, { name: 'Теневой', emoji: '🌑' }, { name: 'Золотой', emoji: '🐉' } ]},
+            { id: 'food', name: 'Ящик Еды', price: 40, icon: '🍕', color: '#f97316', drops: [ { name: 'Пицца', emoji: '🍕' }, { name: 'Бургер', emoji: '🍔' }, { name: 'Суши', emoji: '🍣' }, { name: 'Торт', emoji: '🍰' } ]},
+            { id: 'treasure', name: 'Ящик Сокровищ', price: 200, icon: '💎', color: '#10b981', drops: [ { name: 'Алмаз', emoji: '💎' }, { name: 'Изумруд', emoji: '🟩' }, { name: 'Рубин', emoji: '🟥' }, { name: 'Сапфир', emoji: '🟦' } ]},
+            { id: 'cuties', name: 'Ящик Милашек', price: 80, icon: '🧸', color: '#f472b6', drops: [ { name: 'Мишка', emoji: '🧸' }, { name: 'Кролик', emoji: '🐰' }, { name: 'Панда', emoji: '🐼' }, { name: 'Коала', emoji: '🐨' } ]},
+            { id: 'magic', name: 'Ящик Магии', price: 120, icon: '🔮', color: '#a855f7', drops: [ { name: 'Шар', emoji: '🔮' }, { name: 'Зелье', emoji: '🧪' }, { name: 'Посох', emoji: '🪄' }, { name: 'Гримуар', emoji: '📖' } ]},
+            { id: 'cars', name: 'Ящик Тачек', price: 300, icon: '🚗', color: '#ef4444', drops: [ { name: 'Тесла', emoji: '⚡' }, { name: 'Феррари', emoji: '🏎️' }, { name: 'Ламбо', emoji: '🚗' }, { name: 'Порше', emoji: '🚙' } ]},
+            { id: 'tech', name: 'Ящик Техники', price: 250, icon: '📱', color: '#64748b', drops: [ { name: 'iPhone', emoji: '📱' }, { name: 'MacBook', emoji: '💻' }, { name: 'PlayStation', emoji: '🎮' }, { name: 'Наушники', emoji: '🎧' } ]},
+            { id: 'owls', name: 'Ящик Сов', price: 110, icon: '🦉', color: '#d97706', drops: [ { name: 'Белая Сова', emoji: '🦉' }, { name: 'Сипуха', emoji: '🦅' }, { name: 'Филин', emoji: '🦆' }, { name: 'Неясыть', emoji: '🦜' } ]},
+            { id: 'rabbits', name: 'Ящик Кроликов', price: 70, icon: '🐰', color: '#fbcfe8', drops: [ { name: 'Белый', emoji: '🐇' }, { name: 'Серый', emoji: '🐰' }, { name: 'Черный', emoji: '🐈‍⬛' }, { name: 'Розовый', emoji: '🐷' } ]},
+            { id: 'coins', name: 'Ящик Монет', price: 180, icon: '🪙', color: '#fbbf24', drops: [ { name: 'Бронза', emoji: '🟤' }, { name: 'Серебро', emoji: '⚪' }, { name: 'Золото', emoji: '🟡' }, { name: 'Платина', emoji: '🪙' } ]},
+            { id: 'fish', name: 'Ящик Рыб', price: 60, icon: '🐟', color: '#0ea5e9', drops: [ { name: 'Клоун', emoji: '🐠' }, { name: 'Скалярия', emoji: '🐟' }, { name: 'Золотая', emoji: '🐡' }, { name: 'Меченосец', emoji: '🦈' } ]},
+            { id: 'birds', name: 'Ящик Птиц', price: 90, icon: '🦜', color: '#10b981', drops: [ { name: 'Попугай', emoji: '🦜' }, { name: 'Орел', emoji: '🦅' }, { name: 'Феникс', emoji: '🔥' }, { name: 'Сокол', emoji: '🦅' } ]},
+            { id: 'fruits', name: 'Ящик Фруктов', price: 30, icon: '🍎', color: '#ef4444', drops: [ { name: 'Яблоко', emoji: '🍎' }, { name: 'Банан', emoji: '🍌' }, { name: 'Апельсин', emoji: '🍊' }, { name: 'Виноград', emoji: '🍇' } ]},
+            { id: 'hearts', name: 'Ящик Сердец', price: 150, icon: '❤️', color: '#dc2626', drops: [ { name: 'Красное', emoji: '❤️' }, { name: 'Розовое', emoji: '💖' }, { name: 'Золотое', emoji: '💛' }, { name: 'Черное', emoji: '🖤' } ]},
+            { id: 'mushrooms', name: 'Ящик Грибов', price: 45, icon: '🍄', color: '#f87171', drops: [ { name: 'Мухомор', emoji: '🍄' }, { name: 'Белый', emoji: '🍄' }, { name: 'Лисичка', emoji: '🍄' }, { name: 'Поганка', emoji: '🍄' } ]},
+            { id: 'weapons', name: 'Ящик Оружия', price: 500, icon: '⚔️', color: '#94a3b8', drops: [ { name: 'Меч', emoji: '⚔️' }, { name: 'Топор', emoji: '🪓' }, { name: 'Лук', emoji: '🏹' }, { name: 'Копье', emoji: '🔱' } ]},
+            { id: 'drinks', name: 'Ящик Напитков', price: 35, icon: '☕', color: '#78350f', drops: [ { name: 'Кофе', emoji: '☕' }, { name: 'Чай', emoji: '🍵' }, { name: 'Кола', emoji: '🥤' }, { name: 'Сок', emoji: '🧃' } ]},
+            { id: 'clothes', name: 'Ящик Одежды', price: 220, icon: '👕', color: '#60a5fa', drops: [ { name: 'Футболка', emoji: '👕' }, { name: 'Худи', emoji: '🧥' }, { name: 'Кроссовки', emoji: '👟' }, { name: 'Кепка', emoji: '🧢' } ]},
+            { id: 'weather', name: 'Ящик Погоды', price: 130, icon: '⛅', color: '#94a3b8', drops: [ { name: 'Солнце', emoji: '☀️' }, { name: 'Дождь', emoji: '🌧️' }, { name: 'Снег', emoji: '❄️' }, { name: 'Молния', emoji: '⚡' } ]},
+            { id: 'insects', name: 'Ящик Насекомых', price: 55, icon: '🐞', color: '#ef4444', drops: [ { name: 'Божья Коровка', emoji: '🐞' }, { name: 'Бабочка', emoji: '🦋' }, { name: 'Пчела', emoji: '🐝' }, { name: 'Муравей', emoji: '🐜' } ]},
+            { id: 'holiday', name: 'Ящик Праздника', price: 170, icon: '🎄', color: '#10b981', drops: [ { name: 'Санта', emoji: '🎅' }, { name: 'Тыква', emoji: '🎃' }, { name: 'Яйцо', emoji: '🥚' }, { name: 'Елка', emoji: '🎄' } ]},
+            { id: 'royal', name: 'Ящик Короля', price: 600, icon: '👑', color: '#fbbf24', drops: [ { name: 'Корона', emoji: '👑' }, { name: 'Скипетр', emoji: '🪄' }, { name: 'Трон', emoji: '🪑' }, { name: 'Мантия', emoji: '🧥' } ]},
+            { id: 'sharks', name: 'Ящик Акул', price: 140, icon: '🦈', color: '#64748b', drops: [ { name: 'Тигровая', emoji: '🦈' }, { name: 'Белая', emoji: '🦈' }, { name: 'Молот', emoji: '🔨' }, { name: 'Китовая', emoji: '🐋' } ]},
+            { id: 'mythic', name: 'Ящик Мифов', price: 800, icon: '🦅', color: '#a855f7', drops: [ { name: 'Феникс', emoji: '🔥' }, { name: 'Грифон', emoji: '🦅' }, { name: 'Единорог', emoji: '🦄' }, { name: 'Пегас', emoji: '🐴' } ]},
+            { id: 'legendary', name: 'Ящик Легенд', price: 1000, icon: '🏆', color: '#fde047', drops: [ { name: 'Кубок', emoji: '🏆' }, { name: 'Медаль', emoji: '🏅' }, { name: 'Звезда', emoji: '🌟' }, { name: 'Алмаз', emoji: '💎' } ]}
         ];
 
         function upd() {
@@ -205,20 +171,22 @@
             track.style.transition = 'none';
             track.style.transform = 'translateX(0)';
             
+            // Крутим 40 элементов
             for (let i = 0; i < 40; i++) {
                 let randDrop = c.drops[Math.floor(Math.random() * c.drops.length)];
                 track.innerHTML += `
                     <div class="roll-item">
-                        <div class="nft-img" style="--c: ${c.color}"><img src="${randDrop.img}" width="100%"></div>
+                        <div class="nft-img" style="--c: ${c.color}">${randDrop.emoji}</div>
                         <div class="nft-name" style="color: ${c.color}">${randDrop.name}</div>
                     </div>
                 `;
             }
             
+            // Наш выигрыш
             win = c.drops[Math.floor(Math.random() * c.drops.length)];
             let wIdx = 35;
             track.children[wIdx].innerHTML = `
-                <div class="nft-img" style="--c: #fff; box-shadow: 0 0 20px #fff;"><img src="${win.img}" width="100%"></div>
+                <div class="nft-img" style="--c: #fff; box-shadow: 0 0 20px #fff;">${win.emoji}</div>
                 <div class="nft-name" style="color: #fff">${win.name}</div>
             `;
             track.children[wIdx].style.border = '2px solid #fff';
@@ -238,7 +206,7 @@
         }
 
         function claim() {
-            p.inv.push({ name: win.name, img: win.img, val: cost });
+            p.inv.push({ name: win.name, emoji: win.emoji, val: cost });
             p.xp += Math.floor(cost / 2);
             
             if (p.xp >= p.lvl * 100) {
@@ -261,7 +229,7 @@
             }
             document.getElementById('inv-grid').innerHTML = p.inv.map((item, i) => `
                 <div class="inv-item">
-                    <div class="nft-img"><img src="${item.img}" width="100%"></div>
+                    <div class="nft-img">${item.emoji}</div>
                     <div class="box-title" style="margin-top:5px;">${item.name}</div>
                     <button class="sell-btn" onclick="sell(${i})">Продать ${Math.floor(item.val * 0.5)} ⭐</button>
                 </div>
