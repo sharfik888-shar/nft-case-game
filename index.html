@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NFT Кейсы</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем SDK Telegram -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="balance">Баланс: <span id="balance">100</span> ⭐</div>
+    </div>
+
+    <div class="main-screen" id="main-screen">
+        <h1>Открывай кейсы!</h1>
+        <div class="case" onclick="openCase()">
+            <div class="case-icon">🎁</div>
+            <div class="case-name">Базовый кейс</div>
+            <div class="case-price">25 ⭐</div>
+        </div>
+        <button class="btn" onclick="showCollection()">Моя коллекция</button>
+    </div>
+
+    <!-- Экран анимации -->
+    <div class="roulette-screen hidden" id="roulette-screen">
+        <div class="roulette-container">
+            <div class="roulette-line"></div>
+            <div class="roulette-items" id="roulette-items"></div>
+        </div>
+        <p>Открываем...</p>
+    </div>
+
+    <!-- Экран коллекции -->
+    <div class="collection-screen hidden" id="collection-screen">
+        <h2>Коллекция</h2>
+        <div class="inventory" id="inventory"></div>
+        <button class="btn" onclick="showMain()">Назад</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
